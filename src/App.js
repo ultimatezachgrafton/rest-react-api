@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import CharacterTable from "./components/CharacterTable";
 import SearchBar from "./components/SearchBar";
+import Pagination from "./components/Pagination";
 
 class App extends Component {
     constructor() {
@@ -19,7 +20,7 @@ class App extends Component {
         this.searchCharacter = this.searchCharacter.bind(this);
     }
 
-    async componentDidMount() {
+    async getCharacterData() {
         let planetsArray = [];
         let speciesArray = [];
         this.setState({ loading: true });
@@ -38,7 +39,6 @@ class App extends Component {
             let speciesData = await speciesResponse.json();
             speciesArray.push(speciesData.name);
         }
-
         this.setState({
             loading: false,
             characters: [...data.results],
@@ -47,51 +47,56 @@ class App extends Component {
         })
     }
 
-    async loadCharacters(pageNumber) {
-        let response = await fetch(`https://swapi.dev/api/people/?page=${pageNumber}&search=${this.state.nameSearch}`);
-        let data = await response.json();
-        this.setState({
-            characters: data,
-        });
+    async componentDidMount() {
+        this.getCharacterData();
     }
 
-    async searchCharacter(event) {
-        event.preventDefault();
-        let response = await fetch(`https://swapi.dev/api/people/?search=${this.state.nameSearch}`)
-            .then(res => res.json());
-        this.setState({
-            characters: response.results,
-        });
-    }
+async loadCharacters(pageNumber) {
+    let response = await fetch(`https://swapi.dev/api/people/?page=${pageNumber}`);
+    let data = await response.json();
+    this.setState({
+        characters: data.results,
+    });
+}
 
-    handleChange(event) {
-        const { name, value } = event.target;
-        this.setState({
-            [name]: value
-        })
-    };
+async searchCharacter(event) {
+    event.preventDefault();
+    let response = await fetch(`https://swapi.dev/api/people/?search=${this.state.nameSearch}`)
+        .then(res => res.json());
+    this.setState({
+        characters: response.results,
+    });
+}
 
-    render() {
-        return (
-            <div className="App">
-                <div class="topnav">
-                    <h1>Star Wars Character Database</h1>
-                    <SearchBar
-                        characterSearch={this.state.characterSearch}
-                        searchCharacter={this.searchCharacter}
-                        handleChange={this.handleChange} />
-                </div>
-                <div class="character-table">
-                    {(this.state.loading) ? "... completing Kessel Run ..." :
-                        <CharacterTable
-                            key={this.state.characters}
-                            characters={this.state.characters}
-                            planets={this.state.planets}
-                            species={this.state.species} />}
-                </div>
+handleChange(event) {
+    const { name, value } = event.target;
+    this.setState({
+        [name]: value
+    })
+};
+
+render() {
+    return (
+        <div className="App">
+            <div className="topnav">
+                <h1>Star Wars Character Database</h1>
+                <SearchBar
+                    characterSearch={this.state.characterSearch}
+                    searchCharacter={this.searchCharacter}
+                    handleChange={this.handleChange} />
             </div>
-        );
-    }
+            <div className="character-table">
+                {(this.state.loading) ? "... completing Kessel Run ..." :
+                    <CharacterTable
+                        key={this.state.characters}
+                        characters={this.state.characters}
+                        planets={this.state.planets}
+                        species={this.state.species} />}
+            </div>
+            <Pagination loadCharacters={this.loadCharacters} />
+        </div>
+    );
+}
 }
 
 export default App

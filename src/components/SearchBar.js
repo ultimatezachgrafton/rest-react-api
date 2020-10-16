@@ -11,7 +11,7 @@ function SearchForm(props){
                 onChange={props.handleChange}
                 placeholder="Enter Character Data..."
                 required></input>
-            <button id="submit-btn" type="submit" class="btn btn-dark">Submit</button>
+            <button id="submit-btn" type="submit" className="btn btn-dark">Submit</button>
         </form>
     )
 }
